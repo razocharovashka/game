@@ -4,21 +4,32 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import sample.Main;
 
-import static sample.Main.HEIGHT;
-import static sample.Main.WIDTH;
+import static sample.Main.*;
 
 public class MyFish extends Fish {
-    public MyFish(int height, int width) {
-        this.object = new Rectangle(height, width, Color.RED);
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+
+    public MyFish(int size) {
+        this.size = size;
+        this.object = new Rectangle(size, size, Color.RED);
 
         this.getChildren().add(object);
     }
 
     @Override
     public void Move(int x, int y) {
-        //
         if((this.getTranslateX() + x > 5) && (this.getTranslateY() + y > 5) &&
-                (this.getTranslateX() + x < WIDTH - Main.PLAYER_WIDTH - 20) && (this.getTranslateY() + y < HEIGHT - Main.PLAYER_HEIGHT - 40)) {
+                (this.getTranslateX() + x < WIDTH - this.size - 20) &&
+                (this.getTranslateY() + y < HEIGHT - this.size - 40)) {
             this.setTranslateX(this.getTranslateX() + x);
             this.setTranslateY(this.getTranslateY() + y);
         }

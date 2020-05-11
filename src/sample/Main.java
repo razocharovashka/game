@@ -3,6 +3,7 @@ package sample;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,7 +19,9 @@ import sample.gameclass.Enemy;
 import sample.gameclass.MyFish;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -26,28 +29,30 @@ import java.util.Random;
 public class Main extends Application {
     //
     public static Scene mainScene;
-    public static final int HEIGHT = 600;
+    public static Scene finalScene = null;
+    public static final int HEIGHT = 620;
     public static final int WIDTH = 800;
-    private static GraphicsContext graphicsContext;
+    public static GraphicsContext graphicsContext;
+    private static Image fishLeft;
+    private static Image fishRight;
+    private static Image backgroundImage;
+    private static Image lastSide;
+    public static Image enemyFish;
     //
-    private static MyFish player;
-//    private static Enemy fish1;
-//    private static Enemy fish2;
-//    private static Enemy fish3;
-//    private static Enemy fish4;
-//    private static Enemy fish5;
-//    private static Enemy fish6;
+    public static MyFish player;
 
-    private static List<Enemy> neutralFishes;   //нейтральные рыбы
-    public static final int PLAYER_HEIGHT = 30;
-    public static final int PLAYER_WIDTH = 30;
+    public static boolean isFinish = false;
+    public static List<Enemy> neutralFishes;   //нейтральные рыбы
+    public static int PLAYER_SIZE = 50;
     private static final int PLAYER_X = 400;
     private static final int PLAYER_Y = 300;
-    private static final int VELOSITY = 1;
+    private static final int PLAYER_VELOCITY = 5;
+    public static final int VELOCITY = 3;
     //
-    private static ArrayList<String> input = new ArrayList<String>();
+    private static ArrayList<String> input = new ArrayList<String>(100);
     private static long startNanoTime = System.nanoTime();
-    private static int counter = 0;
+
+    public static Pane gameRoot = new Pane();
 
     private static Parent sceneCreate(){
         //
@@ -56,47 +61,24 @@ public class Main extends Application {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         graphicsContext = canvas.getGraphicsContext2D();
         //
-        Pane gameRoot = new Pane();
+
         gameRoot.setPrefSize(WIDTH, HEIGHT);
         //
-        player = new MyFish(PLAYER_HEIGHT, PLAYER_WIDTH);
+        player = new MyFish(PLAYER_SIZE);
         player.setTranslateX(PLAYER_X);
         player.setTranslateY(PLAYER_Y);
 
         neutralFishes = new ArrayList<Enemy>();
-        for(int i = 0; i < 100; i++) {
-            int size = (int) (Math.random() * 100 + 10);
-            int locationY = (int) (Math.random() * 6) * 100;//
-            int locationLeftX = (int) (Math.random() * 10000) * (-1);
-            int locationRightX = (int) (Math.random() * 10000) + 1000;
+        for(int i = 0; i < 20; i++) {
             double rand = Math.random();
             if(rand >= 0.5) {
-                neutralFishes.add(new Enemy(Color.BLACK, size, VELOSITY, true));
-                neutralFishes.get(i).setTranslateX(locationLeftX);
+                neutralFishes.add(new Enemy(true));
             }
             else {
-                neutralFishes.add(new Enemy(Color.BLACK, size, VELOSITY, false));
-                neutralFishes.get(i).setTranslateX(locationRightX);
+                neutralFishes.add(new Enemy(false));
             }
-            neutralFishes.get(i).setTranslateY(locationY);
             gameRoot.getChildren().add(neutralFishes.get(i));
         }
-            //есть min max
-          //  max -= min;
-        //(int) (Math.random() * ++max) + min
-//            int size = (int) (Math.random() * 100 + 10);
-//            fish = new Enemy(Color.BLACK, size, VELOSITY, true);
-//            fish.setTranslateX(-110);
-//            fish.setTranslateY(120);
-//
-//
-//            size = (int) (Math.random() * 100 + 10);
-//            fish2 = new Enemy(Color.BLACK, size, VELOSITY, false);
-//            fish2.setTranslateX(800);
-//            fish2.setTranslateY(300);
-
-        //gameRoot.getChildren().add(fish);
-        //gameRoot.getChildren().add(fish2);
         gameRoot.getChildren().add(player);
         appRoot.getChildren().add(gameRoot);
         appRoot.getChildren().add(canvas);
@@ -122,42 +104,61 @@ public class Main extends Application {
         });
     }
 
+    private static void loadImage(){
+        fishLeft = new Image(new File("src/sample/Resources/pictures/fish2.png").toURI().toString(), 50, 50, false, false);
+        fishRight = new Image(new File("src/sample/Resources/pictures/fish2_new.png").toURI().toString(), 50, 50, false, false);
+        backgroundImage = new Image(new File("src/sample/resources/pictures/background.png").toURI().toString(), 800, 600, false, false);
+        lastSide = fishLeft;
+
+    }
+
     private static void update(long currentNanoTime){
         double t = (currentNanoTime - startNanoTime) / 1000000000.0;
         graphicsContext.clearRect(0, 0, WIDTH, HEIGHT);
-        //File backgroundImage = new File("src/sample/resources/pictures/background.png");
-        //graphicsContext.drawImage(new Image(backgroundImage.toURI().toString(), 800, 600, false, false), 0, 0);
-//        fish = list.get(0);
-////        //
-////        int i = 1;
-////        counter++;
-////        //ок
-////        if((counter == 1000)&&(i < list.size())) {
-////            fish = list.get(i);
-////            fish.Move(fish.getVelocity(), 0);
-////            i++;
-////            counter = 0;
-////
+        graphicsContext.drawImage(backgroundImage, 0, 0);
 
-        for(Enemy fish: neutralFishes) {
-            fish.Move(fish.getVelocity(), 0);
+        //File fishFile = new File("src/sample/resources/pictures/fish2.png");
+
+        for (Enemy fishEnemy : neutralFishes) {
+            if(fishEnemy.isVisible()) {
+                //if(fishEnemy.isFlag()) {
+                    enemyFish = new Image(new File("src/sample/Resources/pictures/enemy.png").toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
+                    graphicsContext.drawImage(enemyFish, fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
+                //}
+                //else {
+                  //  enemyFish = new Image(new File("src/sample/Resources/pictures/enemyLeft.png").toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
+                    //graphicsContext.drawImage(enemyFish, fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
+                //}
+            }
+            fishEnemy.Move(fishEnemy.getVelocity(), 0);
         }
         //
+        //Если игрок не движется
+        if (!input.contains("RIGHT") && !input.contains("LEFT") && !input.contains("UP")
+                && !input.contains("DOWN")) {
+            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
+        }
 
         if (input.contains("LEFT")){
-            player.Move(-2, 0);
+            player.Move(PLAYER_VELOCITY * (-1), 0);
+            graphicsContext.drawImage(fishLeft, player.getTranslateX(), player.getTranslateY());
+            lastSide = fishLeft;
         }
 
         if (input.contains("RIGHT")){
-            player.Move(2, 0);
+            player.Move(PLAYER_VELOCITY * 1, 0);
+            graphicsContext.drawImage(fishRight, player.getTranslateX(), player.getTranslateY());
+            lastSide = fishRight;
         }
 
         if (input.contains("UP")) {
-            player.Move(0, -2);
+            player.Move(0, PLAYER_VELOCITY * (-1));
+            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
         }
 
         if (input.contains("DOWN")) {
-            player.Move(0, 2);
+            player.Move(0, PLAYER_VELOCITY * 1);
+            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
         }
     }
 
@@ -166,23 +167,25 @@ public class Main extends Application {
         primaryStage.setTitle("Fish eating small fish");
         primaryStage.setHeight(HEIGHT);
         primaryStage.setWidth(WIDTH);
+        primaryStage.setResizable(false);
         mainScene = new Scene(sceneCreate());
         primaryStage.setScene(mainScene);
 
+        try {
+            finalScene = new Scene(FXMLLoader.load(Main.class.getResource("Resources/view/sample.fxml")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         handler();
-//        Sprite background = new Sprite();
-//        File backgroundFile = new File("C:\\Users\\Алена\\IdeaProjects\\GameFish\\src\\sample\\pictures\\background.png");
-//        background.setImage(new Image(backgroundFile.toURI().toString(), 800, 600, false, false));
-//        background.setPosition(0, 0);
-//
-//        Sprite fish = new Sprite();
-//        File fishFile = new File("C:\\Users\\Алена\\IdeaProjects\\GameFish\\src\\sample\\pictures\\fish2_new.png");
-//        fish.setImage(new Image(fishFile.toURI().toString(), 30, 30, false, false));
-//        fish.setPosition(400, 300);
+        loadImage();
 
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 update(currentNanoTime);
+                if(isFinish){
+                    primaryStage.setScene(finalScene);
+                }
             }
         }.start();
 
