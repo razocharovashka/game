@@ -14,6 +14,8 @@ public class Enemy extends Fish{
     //private Color color;
     private int size;
     private int velocity;
+    private Image image;
+    private boolean isEat = false;
 
     public boolean isFlag() {
         return flag;
@@ -32,10 +34,10 @@ public class Enemy extends Fish{
         this.object = new Rectangle(size, size, Color.BLACK);
         this.setTranslateY((int) (Math.random() * 6) * 100);
         if(this.flag) {
-            this.setTranslateX((int) (Math.random() * 1000) * (-1));
+            this.setTranslateX((int) (Math.random() * 10000) * (-1));
         }
         else {
-            this.setTranslateX((int) (Math.random() * 1000) + 1000);
+            this.setTranslateX((int) (Math.random() * 10000) + 1000);
         }
 
         this.getChildren().add(object);
@@ -54,9 +56,13 @@ public class Enemy extends Fish{
     public void Move(int x, int y) {
         if(this.getBoundsInParent().intersects(player.getBoundsInParent())){
             if(this.getSize() < player.getSize()) {
+                if(this.isVisible()) {
+                    score++;
+                }
                 this.setVisible(false);
             }
             else {
+                isStart = false;
                 isFinish = true;
             }
         }
@@ -68,5 +74,12 @@ public class Enemy extends Fish{
             this.setTranslateX(this.getTranslateX() - x);
             this.setTranslateY(this.getTranslateY() - y);
         }
+    }
+
+    public void setImage(Image image){
+        this.image = image;
+    }
+    public Image getImage(){
+        return this.image;
     }
 }

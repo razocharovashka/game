@@ -8,22 +8,23 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.ConstraintsBase;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
+import sample.controller.Controller;
 import sample.gameclass.Enemy;
 import sample.gameclass.MyFish;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 
 public class Main extends Application {
@@ -33,6 +34,9 @@ public class Main extends Application {
     public static final int HEIGHT = 620;
     public static final int WIDTH = 800;
     public static GraphicsContext graphicsContext;
+    private static double finishTime = 60.0;
+    private static Label textLabel;
+
     private static Image fishLeft;
     private static Image fishRight;
     private static Image backgroundImage;
@@ -40,17 +44,21 @@ public class Main extends Application {
     public static Image enemyFish;
     //
     public static MyFish player;
-
+    public static boolean isStart = true;
     public static boolean isFinish = false;
+
     public static List<Enemy> neutralFishes;   //нейтральные рыбы
     public static int PLAYER_SIZE = 50;
-    private static final int PLAYER_X = 400;
-    private static final int PLAYER_Y = 300;
-    private static final int PLAYER_VELOCITY = 5;
-    public static final int VELOCITY = 3;
+    public static final int PLAYER_X = 400;
+    public static final int PLAYER_Y = 300;
+    private static final int PLAYER_VELOCITY = 2;
+    public static final int VELOCITY = 1;
+    public static final int NUMBER_FISH = 200;
+    public static int score = 0;
+    public static boolean flag = true;
     //
     private static ArrayList<String> input = new ArrayList<String>(100);
-    private static long startNanoTime = System.nanoTime();
+    public static long startNanoTime = System.nanoTime();
 
     public static Pane gameRoot = new Pane();
 
@@ -69,7 +77,7 @@ public class Main extends Application {
         player.setTranslateY(PLAYER_Y);
 
         neutralFishes = new ArrayList<Enemy>();
-        for(int i = 0; i < 20; i++) {
+        for(int i = 0; i < NUMBER_FISH; i++) {
             double rand = Math.random();
             if(rand >= 0.5) {
                 neutralFishes.add(new Enemy(true));
@@ -109,26 +117,36 @@ public class Main extends Application {
         fishRight = new Image(new File("src/sample/Resources/pictures/fish2_new.png").toURI().toString(), 50, 50, false, false);
         backgroundImage = new Image(new File("src/sample/resources/pictures/background.png").toURI().toString(), 800, 600, false, false);
         lastSide = fishLeft;
-
+        File imageEnemyFish = new File("src/sample/Resources/pictures/enemy.png");
+        for(Enemy fishEnemy: neutralFishes) {
+            enemyFish = new Image(imageEnemyFish.toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
+            fishEnemy.setImage(enemyFish);
+        }
     }
 
     private static void update(long currentNanoTime){
         double t = (currentNanoTime - startNanoTime) / 1000000000.0;
+        System.out.println(t);
+        if(finishTime < t){
+            startNanoTime = currentNanoTime;
+            isStart = false;
+            isFinish = true;
+        }
         graphicsContext.clearRect(0, 0, WIDTH, HEIGHT);
         graphicsContext.drawImage(backgroundImage, 0, 0);
 
-        //File fishFile = new File("src/sample/resources/pictures/fish2.png");
+        Font theFont = Font.font( "Helvetica", FontWeight.BOLD, 24 );
+        graphicsContext.setFont(theFont);
+        graphicsContext.setFill(Color.WHITE);
+        graphicsContext.setStroke(Color.BLACK);
+        graphicsContext.setLineWidth(1);
+        String textScore = "Score: " + score;
+        graphicsContext.fillText(textScore, 20, 20);
+        graphicsContext.strokeText(textScore, 20, 20);
 
         for (Enemy fishEnemy : neutralFishes) {
             if(fishEnemy.isVisible()) {
-                //if(fishEnemy.isFlag()) {
-                    enemyFish = new Image(new File("src/sample/Resources/pictures/enemy.png").toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
-                    graphicsContext.drawImage(enemyFish, fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
-                //}
-                //else {
-                  //  enemyFish = new Image(new File("src/sample/Resources/pictures/enemyLeft.png").toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
-                    //graphicsContext.drawImage(enemyFish, fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
-                //}
+                    graphicsContext.drawImage(fishEnemy.getImage(), fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
             }
             fishEnemy.Move(fishEnemy.getVelocity(), 0);
         }
@@ -146,7 +164,7 @@ public class Main extends Application {
         }
 
         if (input.contains("RIGHT")){
-            player.Move(PLAYER_VELOCITY * 1, 0);
+            player.Move(PLAYER_VELOCITY, 0);
             graphicsContext.drawImage(fishRight, player.getTranslateX(), player.getTranslateY());
             lastSide = fishRight;
         }
@@ -169,7 +187,6 @@ public class Main extends Application {
         primaryStage.setWidth(WIDTH);
         primaryStage.setResizable(false);
         mainScene = new Scene(sceneCreate());
-        primaryStage.setScene(mainScene);
 
         try {
             finalScene = new Scene(FXMLLoader.load(Main.class.getResource("Resources/view/sample.fxml")));
@@ -181,10 +198,20 @@ public class Main extends Application {
         loadImage();
 
         new AnimationTimer() {
-            public void handle(long currentNanoTime) {
-                update(currentNanoTime);
+            public void handle(long currentNanoTime) { //currTime = currentNanoTime;
+
+                if(isStart) {
+                    primaryStage.setScene(mainScene);
+                    if(flag) {
+                        startNanoTime = currentNanoTime;
+                        flag = false;
+                    }
+                    update(currentNanoTime);
+                }
                 if(isFinish){
+                    input.clear();
                     primaryStage.setScene(finalScene);
+                    score = 0;
                 }
             }
         }.start();
