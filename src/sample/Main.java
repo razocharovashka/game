@@ -8,7 +8,6 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -35,7 +34,6 @@ public class Main extends Application {
     public static final int WIDTH = 800;
     public static GraphicsContext graphicsContext;
     private static double finishTime = 60.0;
-    private static Label textLabel;
 
     private static Image fishLeft;
     private static Image fishRight;
@@ -54,7 +52,7 @@ public class Main extends Application {
     private static final int PLAYER_VELOCITY = 2;
     public static final int VELOCITY = 1;
     public static final int NUMBER_FISH = 200;
-    public static int score = 0;
+    public static int score;
     public static boolean flag = true;
     //
     private static ArrayList<String> input = new ArrayList<String>(100);
@@ -175,7 +173,7 @@ public class Main extends Application {
         }
 
         if (input.contains("DOWN")) {
-            player.Move(0, PLAYER_VELOCITY * 1);
+            player.Move(0, PLAYER_VELOCITY);
             graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
         }
     }
@@ -211,7 +209,6 @@ public class Main extends Application {
                 if(isFinish){
                     input.clear();
                     primaryStage.setScene(finalScene);
-                    score = 0;
                 }
             }
         }.start();

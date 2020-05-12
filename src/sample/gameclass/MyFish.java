@@ -2,7 +2,6 @@ package sample.gameclass;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import sample.Main;
 
 import static sample.Main.*;
 
@@ -21,7 +20,6 @@ public class MyFish extends Fish {
     public MyFish(int size) {
         this.size = size;
         this.object = new Rectangle(size, size, Color.RED);
-
         this.getChildren().add(object);
     }
 

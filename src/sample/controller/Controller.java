@@ -1,34 +1,41 @@
 package sample.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.text.Text;
 import sample.Main;
 import sample.gameclass.Enemy;
 import sample.gameclass.MyFish;
 import static sample.Main.*;
-import javafx.scene.control.Label;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.ArrayList;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable {
     @FXML
     private Button returnButton;
+    public Text text;
 
     @FXML
     public void returnButton(){
         Main.isFinish = false;
         //startNanoTime = currTime;// - 10_000_000_000L;
-        initialize();
+        initializeGame();
         Main.isStart = true;
         flag = true;
     }
 
-    private static void initialize(){
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        text.setText("" + score);
+    }
+
+    private static void initializeGame(){
         neutralFishes.clear();
+        //score = 0;
         player = new MyFish(PLAYER_SIZE);
         player.setTranslateX(PLAYER_X);
         player.setTranslateY(PLAYER_Y);
@@ -51,4 +58,6 @@ public class Controller {
             fishEnemy.setImage(enemyFish);
         }
     }
+
+
 }

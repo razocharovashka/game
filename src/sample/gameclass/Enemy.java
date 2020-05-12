@@ -5,10 +5,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import sample.Main;
 
-import java.io.File;
-
 import static sample.Main.*;
-import static sample.Main.player;
 
 public class Enemy extends Fish{
     //private Color color;
