@@ -8,17 +8,13 @@ import sample.Main;
 import static sample.Main.*;
 
 public class Enemy extends Fish{
-    //private Color color;
-    private int size;
     private int velocity;
     private Image image;
-    private boolean isEat = false;
+    private boolean flag;
 
     public boolean isFlag() {
         return flag;
     }
-
-    private boolean flag;
 
     public int getVelocity() {
         return velocity;

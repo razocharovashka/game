@@ -16,8 +16,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
-import sample.controller.Controller;
 import sample.gameclass.Enemy;
+import sample.gameclass.Money;
 import sample.gameclass.MyFish;
 
 import java.io.File;
@@ -25,27 +25,28 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Main extends Application {
-    //
-    public static Scene mainScene;
-    public static Scene finalScene = null;
-    public static final int HEIGHT = 620;
-    public static final int WIDTH = 800;
-    public static GraphicsContext graphicsContext;
-    private static double finishTime = 60.0;
+    //параметры экрана
+    public static Scene mainScene; //главная сцена - игра
+    public static Scene finalScene = null; //последняя сцена - после окончания игры
+    public static final int WIDTH = 800; //ширина окна
+    public static final int HEIGHT = 620; //высота окна
 
-    private static Image fishLeft;
-    private static Image fishRight;
-    private static Image backgroundImage;
-    private static Image lastSide;
-    public static Image enemyFish;
+    public static GraphicsContext graphicsContext; //для графики
+
+    //картинки для объектов
+    private static Image fishLeft; //игрок движется влево
+    private static Image fishRight; //игрок движется вправо
+    private static Image backgroundImage; //фон
+    private static Image lastSide; //последняя картинка игрока
+    public static Image enemyFish; //карнтинка рыб
+    public static Image moneyImage;
     //
     public static MyFish player;
     public static boolean isStart = true;
     public static boolean isFinish = false;
-
-    public static List<Enemy> neutralFishes;   //нейтральные рыбы
+    public static Money money;
+    public static List<Enemy> enemies;   //нейтральные рыбы
     public static int PLAYER_SIZE = 50;
     public static final int PLAYER_X = 400;
     public static final int PLAYER_Y = 300;
@@ -55,8 +56,9 @@ public class Main extends Application {
     public static int score;
     public static boolean flag = true;
     //
-    private static ArrayList<String> input = new ArrayList<String>(100);
+    private static ArrayList<String> input = new ArrayList<String>();
     public static long startNanoTime = System.nanoTime();
+    private static double finishTime = 60.0;
 
     public static Pane gameRoot = new Pane();
 
@@ -70,21 +72,23 @@ public class Main extends Application {
 
         gameRoot.setPrefSize(WIDTH, HEIGHT);
         //
-        player = new MyFish(PLAYER_SIZE);
-        player.setTranslateX(PLAYER_X);
-        player.setTranslateY(PLAYER_Y);
+        player = new MyFish(PLAYER_SIZE, PLAYER_X, PLAYER_Y);
 
-        neutralFishes = new ArrayList<Enemy>();
+        enemies = new ArrayList<Enemy>();
         for(int i = 0; i < NUMBER_FISH; i++) {
             double rand = Math.random();
             if(rand >= 0.5) {
-                neutralFishes.add(new Enemy(true));
+                enemies.add(new Enemy(true));
             }
             else {
-                neutralFishes.add(new Enemy(false));
+                enemies.add(new Enemy(false));
             }
-            gameRoot.getChildren().add(neutralFishes.get(i));
+            gameRoot.getChildren().add(enemies.get(i));
         }
+
+        money = new Money();
+
+        gameRoot.getChildren().add(money);
         gameRoot.getChildren().add(player);
         appRoot.getChildren().add(gameRoot);
         appRoot.getChildren().add(canvas);
@@ -116,10 +120,12 @@ public class Main extends Application {
         backgroundImage = new Image(new File("src/sample/resources/pictures/background.png").toURI().toString(), 800, 600, false, false);
         lastSide = fishLeft;
         File imageEnemyFish = new File("src/sample/Resources/pictures/enemy.png");
-        for(Enemy fishEnemy: neutralFishes) {
+        for(Enemy fishEnemy: enemies) {
             enemyFish = new Image(imageEnemyFish.toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
             fishEnemy.setImage(enemyFish);
         }
+        moneyImage = new Image(new File("src/sample/Resources/pictures/money.png").toURI().toString(), 30, 30, false, false);
+        money.setImage(moneyImage);
     }
 
     private static void update(long currentNanoTime){
@@ -132,17 +138,21 @@ public class Main extends Application {
         }
         graphicsContext.clearRect(0, 0, WIDTH, HEIGHT);
         graphicsContext.drawImage(backgroundImage, 0, 0);
+        if(money.isVisible()) {
+            graphicsContext.drawImage(money.getImage(), money.getTranslateX(), money.getTranslateY());
+        }
 
-        Font theFont = Font.font( "Helvetica", FontWeight.BOLD, 24 );
-        graphicsContext.setFont(theFont);
-        graphicsContext.setFill(Color.WHITE);
-        graphicsContext.setStroke(Color.BLACK);
-        graphicsContext.setLineWidth(1);
-        String textScore = "Score: " + score;
-        graphicsContext.fillText(textScore, 20, 20);
-        graphicsContext.strokeText(textScore, 20, 20);
+        //вывод строки счета
+        Font theFont = Font.font( "Helvetica", FontWeight.BOLD, 24 ); //шрифт
+        graphicsContext.setFont(theFont); //установить шрифт и вывести
+        graphicsContext.setFill(Color.WHITE); //установить цвет внутри
+        graphicsContext.setStroke(Color.BLACK); //установить цвет обводки символов
+        graphicsContext.setLineWidth(1); //установить ширину линии
+        String textScore = "Score: " + score; //текст строки
+        graphicsContext.fillText(textScore, 20, 30); //рисует на холсте текст с заливкой
+        graphicsContext.strokeText(textScore, 20, 30); //обводка заданного текста
 
-        for (Enemy fishEnemy : neutralFishes) {
+        for (Enemy fishEnemy : enemies) {
             if(fishEnemy.isVisible()) {
                     graphicsContext.drawImage(fishEnemy.getImage(), fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
             }

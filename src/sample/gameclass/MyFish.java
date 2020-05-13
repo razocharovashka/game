@@ -6,7 +6,7 @@ import javafx.scene.shape.Rectangle;
 import static sample.Main.*;
 
 public class MyFish extends Fish {
-    private int size;
+    //private int size;
 
     public int getSize() {
         return size;
@@ -17,8 +17,10 @@ public class MyFish extends Fish {
     }
 
 
-    public MyFish(int size) {
+    public MyFish(int size, int x, int y) {
         this.size = size;
+        this.setTranslateX(x);
+        this.setTranslateY(y);
         this.object = new Rectangle(size, size, Color.RED);
         this.getChildren().add(object);
     }
@@ -30,6 +32,13 @@ public class MyFish extends Fish {
                 (this.getTranslateY() + y < HEIGHT - this.size - 40)) {
             this.setTranslateX(this.getTranslateX() + x);
             this.setTranslateY(this.getTranslateY() + y);
+        }
+
+        if(this.getBoundsInParent().intersects(money.getBoundsInParent())) {
+            if(money.isVisible()) {
+                score += 10;
+            }
+            money.setVisible(false);
         }
     }
 }

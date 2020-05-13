@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?language javascript?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
+
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.Controller">
    <children>
-      <Button fx:id="returnButton" layoutX="306.0" layoutY="370.0" mnemonicParsing="false" onAction="#returnButton" text="Попробуй снова">
+      <Button fx:id="returnButton" layoutX="340.0" layoutY="250.0" mnemonicParsing="false" onAction="#returnButton" text="Играть">
          <font>
             <Font name="Century" size="21.0" />
          </font>
       </Button>
-      <Label layoutX="300.0" layoutY="224.0" prefHeight="30.0" prefWidth="242.0" text="Ваш счет">
-         <font>
-            <Font name="Century" size="40.0" />
-         </font>
-      </Label>
-      <TextField fx:id="text_editor"> </TextField>
    </children>
 </AnchorPane>
