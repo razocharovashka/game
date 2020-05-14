@@ -39,29 +39,30 @@ public class Main extends Application {
     private static Image fishRight; //игрок движется вправо
     private static Image backgroundImage; //фон
     private static Image lastSide; //последняя картинка игрока
-    public static Image enemyFish; //карнтинка рыб
-    public static Image moneyImage;
-    //
-    public static MyFish player;
-    public static boolean isStart = true;
-    public static boolean isFinish = false;
-    public static Money money;
-    public static List<Enemy> enemies;   //нейтральные рыбы
-    public static int PLAYER_SIZE = 50;
-    public static final int PLAYER_X = 400;
-    public static final int PLAYER_Y = 300;
-    private static final int PLAYER_VELOCITY = 2;
-    public static final int VELOCITY = 1;
-    public static final int NUMBER_FISH = 200;
-    public static int score;
-    public static boolean flag = true;
-    //
-    private static ArrayList<String> input = new ArrayList<String>();
-    public static long startNanoTime = System.nanoTime();
-    private static double finishTime = 60.0;
+    public static Image enemyFish; //картинка рыб
+    public static Image moneyImage; //картинка монетки
 
-    public static Pane gameRoot = new Pane();
+    //параметры объектов
+    public static MyFish player; //моя рыбка - игрок
+    public static boolean isStart = true; //флаг старта игры
+    public static boolean isFinish = false; //флаг конца игры
+    public static Money money; //монетка
+    public static List<Enemy> enemies; //рыбы
+    public static int PLAYER_SIZE = 50; //размер игрока
+    public static final int PLAYER_X = 400; //координата Х игрока
+    public static final int PLAYER_Y = 300; //кордината У игрока
+    private static final int PLAYER_VELOCITY = 2; //скорость игрока
+    public static final int VELOCITY = 1; //скорость рыб
+    public static final int NUMBER_FISH = 200; //количество рыб
+    public static int score; //счет игрока - количество съеденных рыб
+    public static boolean flag = true; //флаг для инициализации старта
+    //
+    private static ArrayList<String> input = new ArrayList<String>(); //динамический массив клавиш
+    public static long startNanoTime = System.nanoTime(); //стартовое время в наносекундах
 
+    public static Pane gameRoot = new Pane(); //игровой корень
+
+    //создание главной сцены - самой игры
     private static Parent sceneCreate(){
         //
         Group appRoot = new Group();
@@ -95,13 +96,15 @@ public class Main extends Application {
         return appRoot;
     }
 
+    //функция обработки нажатий
     private static void handler() {
-        mainScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        //
+        mainScene.setOnKeyPressed(new EventHandler<KeyEvent>() { //создаем анонимный внутренний класс
             public void handle(KeyEvent e)
             {
                 String code = e.getCode().toString();
-                if (!input.contains(code))
-                    input.add(code);
+                if (!input.contains(code)) //сравниваем, есть ли такая клавиша в массив
+                    input.add(code); //ее нет, добавляем код клавиши в массив
             }
         });
 
@@ -109,36 +112,48 @@ public class Main extends Application {
             public void handle(KeyEvent e)
             {
                 String code = e.getCode().toString();
-                input.remove(code);
+                input.remove(code); //удаляем клавишу из массива
             }
         });
     }
 
+    //загрузка картинок
     private static void loadImage(){
+        //игрок движется влево
         fishLeft = new Image(new File("src/sample/Resources/pictures/fish2.png").toURI().toString(), 50, 50, false, false);
+        //игрок движется вправо
         fishRight = new Image(new File("src/sample/Resources/pictures/fish2_new.png").toURI().toString(), 50, 50, false, false);
+        //картинка фона
         backgroundImage = new Image(new File("src/sample/resources/pictures/background.png").toURI().toString(), 800, 600, false, false);
+        //последнее направление игрока или при старте игры
         lastSide = fishLeft;
+        //картинка рыбок
         File imageEnemyFish = new File("src/sample/Resources/pictures/enemy.png");
-        for(Enemy fishEnemy: enemies) {
+        for(Enemy fishEnemy: enemies) { //для каждой рыбки из массива
+            //создаем новую картинку со своим размером
             enemyFish = new Image(imageEnemyFish.toURI().toString(), fishEnemy.getSize(), fishEnemy.getSize(), false, false);
-            fishEnemy.setImage(enemyFish);
+            fishEnemy.setImage(enemyFish); //присваиваем картинку рыбке
         }
+        //картинка монетки
         moneyImage = new Image(new File("src/sample/Resources/pictures/money.png").toURI().toString(), 30, 30, false, false);
-        money.setImage(moneyImage);
+        money.setImage(moneyImage); //присваиваем картинку монетке
     }
 
+    //обновление игры
     private static void update(long currentNanoTime){
-        double t = (currentNanoTime - startNanoTime) / 1000000000.0;
-        System.out.println(t);
+        double t = (currentNanoTime - startNanoTime) / 1000000000.0; //сколько времени прошло с момента старта программы
+        double finishTime = 60.0; //игра длится 60 секунд
+        //System.out.println(t);
+        //игра кончилась
         if(finishTime < t){
-            startNanoTime = currentNanoTime;
-            isStart = false;
-            isFinish = true;
+            startNanoTime = currentNanoTime; //новое время старта
+            isStart = false; //игра кончилась
+            isFinish = true; //финальная сцена
         }
-        graphicsContext.clearRect(0, 0, WIDTH, HEIGHT);
-        graphicsContext.drawImage(backgroundImage, 0, 0);
-        if(money.isVisible()) {
+        graphicsContext.clearRect(0, 0, WIDTH, HEIGHT); //очистка экрана
+        graphicsContext.drawImage(backgroundImage, 0, 0); //рисуем фон
+        if(money.isVisible()) { //если монетка видна
+            //рисуем монетку
             graphicsContext.drawImage(money.getImage(), money.getTranslateX(), money.getTranslateY());
         }
 
@@ -152,78 +167,82 @@ public class Main extends Application {
         graphicsContext.fillText(textScore, 20, 30); //рисует на холсте текст с заливкой
         graphicsContext.strokeText(textScore, 20, 30); //обводка заданного текста
 
-        for (Enemy fishEnemy : enemies) {
-            if(fishEnemy.isVisible()) {
-                    graphicsContext.drawImage(fishEnemy.getImage(), fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
+        for (Enemy fishEnemy : enemies) { //для каждой рыбки
+            if(fishEnemy.isVisible()) { //если рыбка видна
+                //рисуем рыбку
+                graphicsContext.drawImage(fishEnemy.getImage(), fishEnemy.getTranslateX(), fishEnemy.getTranslateY());
             }
-            fishEnemy.Move(fishEnemy.getVelocity(), 0);
+            fishEnemy.Move(fishEnemy.getVelocity(), 0); //двигаем рыбку
         }
-        //
+
+        //обработка нажатий на клавиши
         //Если игрок не движется
         if (!input.contains("RIGHT") && !input.contains("LEFT") && !input.contains("UP")
                 && !input.contains("DOWN")) {
-            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
+            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY()); //рисуем игрока
         }
-
+        //если нажата клавиша влево
         if (input.contains("LEFT")){
-            player.Move(PLAYER_VELOCITY * (-1), 0);
-            graphicsContext.drawImage(fishLeft, player.getTranslateX(), player.getTranslateY());
-            lastSide = fishLeft;
+            player.Move(PLAYER_VELOCITY * (-1), 0); //двигаем игрока влево
+            graphicsContext.drawImage(fishLeft, player.getTranslateX(), player.getTranslateY()); //рисуем игрока
+            lastSide = fishLeft; //запоминаем последнее направление
         }
-
+        //если нажата клавиша вправо
         if (input.contains("RIGHT")){
-            player.Move(PLAYER_VELOCITY, 0);
-            graphicsContext.drawImage(fishRight, player.getTranslateX(), player.getTranslateY());
-            lastSide = fishRight;
+            player.Move(PLAYER_VELOCITY, 0); //двигаем игрока вправо
+            graphicsContext.drawImage(fishRight, player.getTranslateX(), player.getTranslateY()); //рисуем игрока
+            lastSide = fishRight; //запоминаем последнее направление
         }
-
+        //если нажата клавиша вверх
         if (input.contains("UP")) {
-            player.Move(0, PLAYER_VELOCITY * (-1));
-            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
+            player.Move(0, PLAYER_VELOCITY * (-1)); //двигаем игрока вверх
+            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY()); //рисуем игрока
         }
-
+        //если нажата клавиша вниз
         if (input.contains("DOWN")) {
-            player.Move(0, PLAYER_VELOCITY);
-            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY());
+            player.Move(0, PLAYER_VELOCITY); //двигаем игрока вниз
+            graphicsContext.drawImage(lastSide, player.getTranslateX(), player.getTranslateY()); //рисуем игрока
         }
     }
 
-    @Override
+    @Override //переопределение метода
+    //старт программы
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Fish eating small fish");
-        primaryStage.setHeight(HEIGHT);
-        primaryStage.setWidth(WIDTH);
-        primaryStage.setResizable(false);
-        mainScene = new Scene(sceneCreate());
+        primaryStage.setTitle("Fish eating small fish"); //устанавливаем название заголовка
+        primaryStage.setHeight(HEIGHT); //устанавливаем высоту
+        primaryStage.setWidth(WIDTH); //устанавливаем ширину
+        primaryStage.setResizable(false); //размер неизменен(нельзя увеличить экран вручную в процессе игры)
+        mainScene = new Scene(sceneCreate()); //создаем главную игровую сцену
 
         try {
             finalScene = new Scene(FXMLLoader.load(Main.class.getResource("Resources/view/sample.fxml")));
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(); //вывод стэка исключений
         }
 
-        handler();
-        loadImage();
+        handler(); //вызываем обработчик нажатий
+        loadImage(); //вызываем функцию загрузки картинок
 
+        //
         new AnimationTimer() {
             public void handle(long currentNanoTime) { //currTime = currentNanoTime;
 
-                if(isStart) {
-                    primaryStage.setScene(mainScene);
-                    if(flag) {
-                        startNanoTime = currentNanoTime;
+                if(isStart) { //игра запущена?
+                    primaryStage.setScene(mainScene); //устанавливаем главую игровую сцену
+                    if(flag) { //игра началась?
+                        startNanoTime = currentNanoTime; //запоминаем стартовое время
                         flag = false;
                     }
-                    update(currentNanoTime);
+                    update(currentNanoTime); //обновление
                 }
-                if(isFinish){
-                    input.clear();
-                    primaryStage.setScene(finalScene);
+                if(isFinish){ //игра окончена?
+                    input.clear(); //очищаем массив клавиш
+                    primaryStage.setScene(finalScene); //устанавливаем финальную сцену
                 }
             }
-        }.start();
+        }.start(); //опять вызываем старт
 
-        primaryStage.show();
+        primaryStage.show(); //показать сцену
     }
 
 
