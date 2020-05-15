@@ -4,20 +4,15 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-public class Money extends GameObject {
-    private Image image; //картинка
-    //получить картинку
-    public Image getImage() {
-        return image;
+public abstract class Money extends GameObject {
+    protected int size; //размер
+    //получить размер
+    public int getSize() {
+        return size;
     }
-    //установить картинку
-    public void setImage(Image image) {
-        this.image = image;
+    //установить размер
+    public void setSize(int size) {
+        this.size = size;
     }
-    //конструктор
-    public Money() {
-        this.object = new Rectangle(10, 10, Color.YELLOW); //объект монетки - желтый прямоугольник
-        this.setTranslateX((int) (Math.random() * 790 + 10)); //координата Х
-        this.setTranslateY((int) (Math.random() * 6) * 100); //координата У
-    }
+    public abstract void setImage();
 }

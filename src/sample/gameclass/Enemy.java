@@ -5,11 +5,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import sample.Main;
 
+import java.io.File;
+
 import static sample.Main.*;
+
 //класс Enemy (рыбки), наследуется от класса Fish
 public class Enemy extends Fish{
-    private int velocity; //скорость
-    private Image image; //картинка
     private boolean flag; //движется вправо - true или влево - false
     //вернуть флаг
     //нужна для установки разных картинок для рыб, которые плывут влево и вправо
@@ -23,7 +24,7 @@ public class Enemy extends Fish{
     //конструктор
     public Enemy(boolean flag) {
         this.size = (int) (Math.random() * 100 + 10); //размер рыбки
-        this.velocity = Main.VELOCITY; //скорость рыбки
+        this.setVelocity(VELOCITY); //скорость рыбки
         this.flag = flag; //флаг - влево или вправо движется
         this.object = new Rectangle(size, size, Color.BLACK); //объект рыбки - черный прямоугольник
         this.setTranslateY((int) (Math.random() * 6) * 100); //координата У - 6 уровней (0, 100, 200, 300, 400, 500)
@@ -36,15 +37,6 @@ public class Enemy extends Fish{
 
         this.getChildren().add(object);
     }
-    //получить размер
-    public int getSize() {
-        return size;
-    }
-    //установить размер
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     //
     @Override //переопределенный метод
     //движение рыбки
@@ -72,12 +64,8 @@ public class Enemy extends Fish{
             this.setTranslateX(this.getTranslateX() - x); //вычитаем скорость из текущей координаты Х
         }
     }
-    //установить кортинку
-    public void setImage(Image image){
-        this.image = image;
-    }
-    //получить картинку
-    public Image getImage(){
-        return this.image;
+
+    public void setImage(Image image) {
+       this.image = image;
     }
 }
